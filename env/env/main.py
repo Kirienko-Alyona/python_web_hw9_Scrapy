@@ -62,7 +62,8 @@ class Spider(scrapy.Spider):
         for q in response.xpath('/html//div[@class="quote"]'):
             quote = q.xpath('span[@class="text"]/text()').get()
             author = q.xpath(
-                'span/small[@class="author"]/text()').get().strip()
+                'span/small[@class="author"]/text()').get(r"\w* \w* ").strip()
+            author = ' '.join(author.split(' ')[:-1])
             tags = q.xpath(
                 'div[@class="tags"]/a[@class="tag"]/text()').extract()
             yield QuoteItem(author=author, quote=quote, tags=tags)
@@ -75,6 +76,7 @@ class Spider(scrapy.Spider):
     def parse_author(self, response):
         body = response.xpath('/html//div[@class="author-details"]')
         fullname = body.xpath('h3[@class="author-title"]/text()').get().strip()
+        fullname = fullname.split('-')[:-1]
         born_date = body.xpath(
             'p/span[@class="author-born-date"]/text()').get().strip()
         born_location = body.xpath(
